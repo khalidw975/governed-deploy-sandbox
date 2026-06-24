@@ -16,3 +16,5 @@ spec:
           readinessProbe: { httpGet: { path: /, port: 80 }, initialDelaySeconds: 2 }
 
           readinessProbe: { httpGet: { path: /, port: 80 }, initialDelaySeconds: 2 }
+
+          readinessProbe: { httpGet: { path: /, port: 80 }, initialDelaySeconds: 2 }
