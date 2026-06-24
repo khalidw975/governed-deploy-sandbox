@@ -15,12 +15,14 @@ jobs:
           curl -sSL "https://github.com/open-policy-agent/conftest/releases/download/v${v}/conftest_${v}_Linux_x86_64.tar.gz" | tar -xz conftest
           sudo install conftest /usr/local/bin/conftest
       - name: Build change.json from PR diff + labels
-        env: { LABELS: ${{ toJson(github.event.pull_request.labels.*.name) }} }
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           BASE="origin/${{ github.base_ref }}"
           CHANGED=$(git diff --name-only "$BASE"...HEAD | jq -R -s 'split("\n") | map(select(length>0))')
+          LABELS=$(gh pr view ${{ github.event.number }} --json labels -q '[.labels[].name]')
           jq -n --argjson paths "$CHANGED" --argjson labels "$LABELS" \
-            '{id:"PR-${{ github.event.number }}",author:"${{ github.event.pull_request.user.login }}",paths:$paths,labels:$labels}' > change.json
+            '{id:"PR-${{ github.event.number }}",paths:$paths,labels:$labels}' > change.json
           echo "::group::change.json"; cat change.json; echo "::endgroup::"
       - name: Run the governed-augmentation policy gate
         run: conftest test change.json -p policy/
